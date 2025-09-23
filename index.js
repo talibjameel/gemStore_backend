@@ -7,6 +7,7 @@ const forgotPasswordRoute = require("./Auth/ForgotPassword");
 const updatePasswordRoute = require("./Auth/ForgotPassword");
 const categoriesRoute = require("./Products/categories");
 const uploadRoute = require("./Integrations_3rd_Apps/AWS_S3");
+const productsRoute = require("./Products/products");
 
 app.use(express.json());
 
@@ -17,6 +18,7 @@ app.use("/", forgotPasswordRoute);
 app.use("/", updatePasswordRoute);
 app.use("/", categoriesRoute);
 app.use("/", uploadRoute);
+app.use("/", productsRoute);
 
 app.get("/", (req, res) => {
   res.send("Welcome to my Node.js + PostGreSQL backend 🚀");

@@ -71,30 +71,6 @@ router.get("/categories/:id", authMiddleware, async (req, res) => {
   }
 });
 
-// ✅ Fetch product by ID
-// ✅ Get only products by categoryId
-router.get("/products/category/:id", authMiddleware, async (req, res) => {
-  try {
-    const categoryId = req.params.id;
-
-    const productsResult = await pool.query(
-      "SELECT * FROM products WHERE category_id = $1",
-      [categoryId]
-    );
-
-    if (productsResult.rows.length === 0) {
-      return res.status(404).json({ message: "No products found for this category ❌" });
-    }
-
-    res.json({
-      message: "Products fetched successfully ✅",
-      products: productsResult.rows,
-    });
-  } catch (e) {
-    console.error("❌ Error while fetching products:", e.message);
-    res.status(500).send("Server error");
-  }
-});
 
 
 
