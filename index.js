@@ -6,7 +6,7 @@ const loginRoute = require("./Auth/Login");
 const forgotPasswordRoute = require("./Auth/ForgotPassword");
 const updatePasswordRoute = require("./Auth/ForgotPassword");
 const categoriesRoute = require("./Products/categories");
-const uploadRoute = require("./Integrations_3rd_Apps/AWS_S3");
+const uploadRoute = require("./Bucket_S3/bucket_s3");
 const productsRoute = require("./Products/products");
 
 app.use(express.json());
@@ -28,6 +28,6 @@ app.get("/", (req, res) => {
 
 
 
-app.listen(3000, () => {
-  console.log("✅ Server running at http://localhost:3000");
+app.listen(process.env.PORT, () => {
+  console.log(`✅ Server running at http://localhost:${process.env.PORT}/`);
 });
