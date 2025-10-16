@@ -40,7 +40,7 @@ router.get("/cart", authMiddleware, async (req, res) => {
  
 
 // 📦 Add product to cart (accepts multipart/form-data fields)
-router.post("/cart/add", authMiddleware, upload.none(), async (req, res) => {
+router.post("/cart/addItem", authMiddleware, upload.none(), async (req, res) => {
   try {
     console.log("Request Headers:", req.headers["content-type"]);
     console.log("Request Body (after multer):", req.body);
@@ -93,7 +93,7 @@ router.post("/cart/add", authMiddleware, upload.none(), async (req, res) => {
 
 
 // 🗑️ Delete product from cart using cart_id
-router.delete("/cart/delete", authMiddleware, upload.none(), async (req, res) => {
+router.delete("/cart/deleteItem", authMiddleware, upload.none(), async (req, res) => {
   try {
     const userId = req.user.id;
     const { cart_id } = req.body;
