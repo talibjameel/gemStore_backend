@@ -5,49 +5,59 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
-
-console.log(process.env.JWT_SECRET);
-console.log(process.env.PORT);
-
 // ✅ Login Route
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // 1. Check if user exists
-    const user = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
-    if (user.rows.length === 0) {
-      return res.status(400).json({ message: "Invalid email or password" });
+    // 1️⃣ Check if user exists
+    const userResult = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "User not registered, kindly go to registration screen.",
+      });
     }
 
-    // 2. Compare password
-    const isMatch = await bcrypt.compare(password, user.rows[0].password);
+    const user = userResult.rows[0];
+
+    // 2️⃣ Compare password
+    const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ message: "Invalid email or password" });
+      return res.status(401).json({
+        success: false,
+        message: "Password is incorrect, please try again.",
+      });
     }
 
-    // 3. Generate JWT Token
+    // 3️⃣ Generate JWT Token
     const jwt_token = jwt.sign(
-      { id: user.rows[0].id, email: user.rows[0].email },
+      { id: user.id, email: user.email },
       process.env.JWT_SECRET,
+      // { expiresIn: "7d" } // optional: add token expiry
     );
 
-    // 4. Send Response
-    res.json({
+    // 4️⃣ Send Response
+    res.status(200).json({
+      success: true,
       message: "Login successful 🚀",
       jwt_token,
       user: {
-        id: user.rows[0].id,
-        name: user.rows[0].name,
-        email: user.rows[0].email,
+        id: user.id,
+        name: user.name,
+        email: user.email,
       },
     });
 
-    console.log("✅ User logged in:", user.rows[0].email);
+    console.log("✅ User logged in:", user.email);
 
   } catch (err) {
     console.error("❌ Error in login:", err.message);
-    res.status(500).send("Server error");
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: err.message,
+    });
   }
 });
 
