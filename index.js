@@ -10,6 +10,7 @@ const uploadRoute = require("./Bucket_S3/bucket_s3");
 const productsRoute = require("./Products/products");
 const bannerRoute = require("./Products/banner");
 const cartRoute = require("./Products/cart");
+const myOrderRoute = require("./Products/my_order");
 
 app.use(express.json());
 
@@ -23,6 +24,7 @@ app.use("/", uploadRoute);
 app.use("/", productsRoute);
 app.use("/", bannerRoute);
 app.use("/", cartRoute);
+app.use("/", myOrderRoute);
 
 app.get("/", (req, res) => {
   res.send("Welcome to my Node.js + PostGreSQL backend 🚀");

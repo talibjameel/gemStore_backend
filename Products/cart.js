@@ -137,6 +137,87 @@ router.delete("/cart/deleteItem", authMiddleware, upload.none(), async (req, res
   }
 });
 
+// 🛒 Update product quantity, shipping cost, or address in cart
+router.put("/cart/updateItem", authMiddleware, upload.none(), async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { cart_id, quantity, shipping_cost, shipping_address } = req.body;
+
+    // ✅ validation
+    if (!cart_id || quantity === undefined) {
+      return res.status(400).json({
+        success: false,
+        message: "cart_id and quantity are required",
+      });
+    }
+
+    if (quantity <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Quantity must be greater than zero",
+      });
+    }
+
+    // ✅ check if cart item exists
+    const check = await pool.query(
+      `SELECT * FROM cart WHERE id = $1 AND user_id = $2`,
+      [cart_id, userId]
+    );
+    if (check.rows.length === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Cart item not found" });
+    }
+
+    // ✅ fallback for shipping cost & address
+    const shipping = shipping_cost
+      ? Number(shipping_cost)
+      : check.rows[0].shipping_cost;
+    const address = shipping_address
+      ? shipping_address
+      : check.rows[0].shipping_address;
+
+    // ✅ update cart item
+    await pool.query(
+      `UPDATE cart 
+       SET quantity = $1, shipping_cost = $2, shipping_address = $3, updated_at = NOW()
+       WHERE id = $4 AND user_id = $5`,
+      [quantity, shipping, address, cart_id, userId]
+    );
+
+    return res
+      .status(200)
+      .json({ success: true, message: "Cart item updated successfully" });
+  } catch (err) {
+    console.error("❌ Error updating cart item:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+
+/// clear whole personal cart after order is placed
+router.delete("/cart/clear", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    console.log("🟢 Debug: Request to clear cart for user_id:", userId);
+
+    const result = await pool.query(`DELETE FROM cart WHERE user_id = $1 RETURNING *`, [userId]);
+
+    console.log(`🟢 Debug: Number of cart items deleted: ${result.rowCount}`);
+    console.log("Deleted rows:", result.rows);
+
+    return res.status(200).json({
+      success: true,
+      message: "Cart cleared successfully",
+    });
+  } catch (err) {
+    console.error("❌ Error clearing cart:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+
+
 
 
 module.exports = router;
